@@ -64,12 +64,13 @@ class ComplexPaneNP(absc.AbsComplexPlane):
         Also reset self.ymin, self.ymax, and/or self.ylen.
         Zoom into the indicated range of the x- and y-axes.
         Refresh the plane as needed."""
-        #  note that xlen and ylen are not allowed to change, so xstep and ystep never change
-        #  so xstep and ystep do not need to be recalculated
+        # note that xstep and ystep must be recalculated for the new min and max
         self.xmin = newXmin
         self.xmax = newXmax
         self.ymin = newYmin
         self.ymax = newYmax
+        self.xstep = (self.xmax - self.xmin)/(self.xlen - 1)
+        self.ystep = (self.ymax - self.ymin)/(self.ylen - 1)
         self.refresh()
 
 
@@ -79,6 +80,26 @@ class ComplexPaneNP(absc.AbsComplexPlane):
         Refresh the plane as needed."""
         self.f = f
         self.refresh()
+
+
+
+def julia(c, max=100):
+    """Creates a function f that counts the number of times the operation z = z**2 + c can
+    be done before the magnitude of z exceeds 2. An optional max which defaults to 100
+    provides a limit to the number of loops before a value of 0 is returned.
+    """
+    def f(z):
+        n = 0
+        while abs(z)<=2:
+            z = z**2 + c
+            if n >= max:
+                n = 0
+                break
+            n+=1
+        return n
+    return f
+
+
 
 
 
