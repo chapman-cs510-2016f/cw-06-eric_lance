@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
+import abscplane as absc
 import numpy as np
 import pandas as pd
-import abscplane as absc
 
 """This is the Class ComplexPlaneNP.  It is built from the Abstract Class AbsComplexPlane.
 This Class serves as a simplistic pan/zoom over a 2D complex plane, where each point in the
@@ -16,7 +16,7 @@ DataFrame and given row and column names to help identify the rows and columns i
 
 The contents of each 'cell' in the ComplexPlaneNP is of type imaginary number.
 """
-class ComplexPaneNP(absc.AbsComplexPlane):
+class ComplexPlaneNP(absc.AbsComplexPlane):
 
     def __init__(self, newXmin=-5., newXmax=5., newYmin=-5., newYmax=5., f=lambda x: x):
         """This is the creator.  It can be passed the the min/max X and Y values for the plane,
@@ -178,13 +178,61 @@ def test_julia_3():
     assert success, message
 
 
+def test_julia_4():
+    """Test the julia function to make sure a subsequent call to julia does not change the parameters and
+    operation of the first call to julia"""
+    success  = False
+
+    #  make the first julia function
+    f1 = julia( 0.2 + 0.2j, 10 )
+    #  make the results from this call the expected outcome
+    expected = f1( 0.7 + 0.7j )
+
+    # make the second julia function
+    f2 = julia( -0.2 + -0.2j, 2 )
+
+    #  call the first julia function again and make sure the output matches the first call
+    actual = f1( 0.7 + 0.7j )
+
+    # how'd we do??
+    if expected == actual:
+        success = True
+
+    message = 'Julia function internals changed between indpendent instatiations:  actual %d expected %d' % (actual, expected)
+    assert success, message
+
+
+def test_julia_5():
+    """Test the julia function to make sure two different function instantiations yield two different results
+    even with the same z value passed to the returned functions"""
+    success  = False
+
+    #  make the first julia function
+    f1 = julia( 0.2 + 0.2j, 10 )
+
+    # make the second julia function
+    f2 = julia( -0.2 + -0.2j, 2 )
+
+    #  call the first julia function again and make sure the output matches the first call
+    #  make the results from this call the expected outcome
+    expected = f1( 0.7 + 0.7j )
+    actual = f2( 0.7 + 0.7j )
+
+    # how'd we do??
+    if expected != actual:
+        success = True
+
+    message = 'Different julia functions constants returned the same value:  f1 %d f2 %d' % (actual, expected)
+    assert success, message
+
+
 def test_init_no_params():
     """Test the creator by passing no parameters.  Since default values are used in place of missing parameters
        this should *not* cause a TypeError exception"""
     success = True
 
     try:
-        testPlane = ComplexPaneNP()
+        testPlane = ComplexPlaneNP()
     except TypeError:
         """test passes"""
         success = False
@@ -202,7 +250,7 @@ def test_init():
         xmax = 6
         ymin = -6
         ymax = -2
-        testPlane = ComplexPaneNP( xmin, xmax, ymin, ymax )
+        testPlane = ComplexPlaneNP( xmin, xmax, ymin, ymax )
 
         #  this line is to force an error to prov the test can fail
         # xmin = xmin + 1
@@ -227,7 +275,7 @@ def f2x(x):
 def itest_setf1():
     """Test that setting the function to a new function updates the plane with the new transformation values"""
     #  create a plane
-    tp = ComplexPaneNP( 0, 10, 0, 10 )
+    tp = ComplexPlaneNP( 0, 10, 0, 10 )
     #  set the function to be f(x) = 2*x
     tp.set_f( f2x )
 
@@ -256,7 +304,7 @@ def test_setf2():
     """Set the transformation function to be something other than a function(), which should fail,
     meaning the test was successful"""
     #  create a plane
-    tp = ComplexPaneNP( 1, 10, 1, 10 )
+    tp = ComplexPlaneNP( 1, 10, 1, 10 )
 
     try:
         #  set the function to be f(x) = 2*x
@@ -283,7 +331,7 @@ def itest_zoom1():
     eplane = [[(( j*xstep + xmin ) + ( i*ystep + ymin )*1j) for i in range(ylen)] for j in range(xlen)]
 
     #  create a plane
-    tp = ComplexPaneNP( 100, 200, -100, 0 )
+    tp = ComplexPlaneNP( 100, 200, -100, 0 )
     tp.zoom(xmin, xmax, ymin, ymax)
 
     #  do the expected and actual planes match?
@@ -294,7 +342,7 @@ def itest_zoom1():
 def test_zoom2():
     """Test the zoom function with invalid values.  Zoom should generate an exception"""
     #  create a plane
-    tp = ComplexPaneNP( 100, 200, -100, 0 )
+    tp = ComplexPlaneNP( 100, 200, -100, 0 )
     try:
         tp.zoom( "one", 100, -1, 3)
         message = 'Test Failed, zoom did not catch use of an invalid parameter'
@@ -310,9 +358,9 @@ def test_zoom2():
 def itest_refresh1():
     """Test the refresh function.  Create a plane, corrupt the data in the plane, refresh and verify the data is once again correct"""
     #  create a plane
-    tp = ComplexPaneNP( 100, 200, -100, 0 )
+    tp = ComplexPlaneNP( 100, 200, -100, 0 )
     #  create a duplicate plane
-    ep = ComplexPaneNP( 100, 200, -100, 0 )
+    ep = ComplexPlaneNP( 100, 200, -100, 0 )
 
     #  corrupt the original test plane
     tp.plane = [[(-1 +  -1j) for i in range(tp.ylen)] for j in range(tp.xlen)]
