@@ -84,19 +84,44 @@ class ComplexPaneNP(absc.AbsComplexPlane):
 
 
 def julia(c, max=100):
-    """Creates a function f that counts the number of times the operation z = z**2 + c can
-    be done before the magnitude of z exceeds 2. An optional max which defaults to 100
-    provides a limit to the number of loops before a value of 0 is returned.
+    """This method creates and returns a function, f.  The parameters passed to julia are:
+    c - an imagery valued constant that is used in the function f.
+    max - an optional argument that sets the maximum loop count within f.  Default is 100.
+
+    The function f requires a single parameter:
+    z - an imaginary number
+
+    f then performs the operation z = z**2 + c on the z passed to f along with the c value passed to julia.
+    The operation is performed up to max times.
+    The function f returns:
+    1 - if the magnitude of the imagiary number (z) passed in exceeds 2
+    n - count of the number of times the operation can be done *before* the magnitude of z exceeds 2
+    0 - if the max iterations through the loop is reached without the magnitude of z reaching 2
+
+    Note that f's return value of 1 is ambiguous:  it could be because the initial z was too large,
+    or because the operation could be performed once successfully.
     """
     def f(z):
-        n = 0
-        while abs(z)<=2:
-            z = z**2 + c
-            if n >= max:
-                n = 0
-                break
-            n+=1
+        # check to see if the input is already too big
+        if abs( z ) <= 2:
+            n = 0
+            while abs(z)<=2:
+                #  perform the operation
+                z = z**2 + c
+                print( z, abs(z), n )
+                #  have we exceeded our max loop count-1?
+                if n >= max:
+                    n = 1
+                    break
+                #  count the number of times through the loop
+                n+=1
+            n -= 1  # subtract one to count the total loops *before* exceeding 2, also reports 0 if max loop reached
+        else:
+            #  report input too big
+            n = 1
         return n
+
+    #  return the function pointer to the caller of the julia() method
     return f
 
 
@@ -104,6 +129,55 @@ def julia(c, max=100):
 
 
 #  unit testing functions beyond this point
+
+def _do_julia( c, z, loop_max = 100 ):
+    """This private function is for testing julia only"""
+    f = julia( c, loop_max )
+    return f( z )
+
+
+def test_julia_1():
+    """Test the julia function for returning the correct count"""
+    success  = False
+    expected = 3
+
+    #  perform the julia test and check the return value
+    actual = _do_julia( 0.2 + 0.2j, 0.7 + 0.7j ) 
+    if expected == actual:
+        success = True
+
+    message = 'Julia function did not return expected count:  actual %d expected %d' % (actual, expected)
+    assert success, message
+
+
+def test_julia_2():
+    """Test the julia function for returning the zero if the loop count is exceeded"""
+    success  = False
+    expected = 0
+
+    #  perform the julia test and check the return value
+    actual = _do_julia( 0.1 + 0.1j, 0.1 + 0.1j, 10 )
+    if expected ==  actual:
+        success = True
+
+    message = 'Julia function was expected to exceed the loop count:  actual %d expected %d' % (actual, expected)
+    assert success, message
+
+
+def test_julia_3():
+    """Test the julia function for returning that the magnitude of the starting value is too large"""
+    success  = False
+    expected = 1
+
+    #  perform the julia test and check the return value
+    actual = _do_julia( 2 + 2j, 7 + 7j )
+    if expected == actual:
+        success = True
+
+    message = 'Julia function did not report the z magnitude already too big:  actual %d expected %d' % (actual, expected)
+    assert success, message
+
+
 def test_init_no_params():
     """Test the creator by passing no parameters.  Since default values are used in place of missing parameters
        this should *not* cause a TypeError exception"""
