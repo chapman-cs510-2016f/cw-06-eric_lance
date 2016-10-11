@@ -32,7 +32,11 @@ Complete the following exercises, saving your solutions in the indicated files. 
 
 Analyze in this section what you found useful about this assignment in your own words. Include any lingering questions or comments that you may have.
 
-**CHANGEME**
+Always good to have someone review your code, as well as looking at someone else's code, as both sides can pick up new ideas and practices.  With this review, the idea of keeping the nose/unit tests in their own file to avoid making the actual source file growing to be large and unwieldy is a good thought which we will do moving forward.
+
+Given more time, it would have been interesting to do a benchmark test between the basic python and the numpy/pandas version of the ComplexPlane class.  Theoretically, we should have seen an improvement in performance by numpy/panda over basic, but not having tried the experiment, we don't have a practial number for the speed up.
+
+Much more to be learned about DataFrames--looking forward to it.
 
 ## Honor Pledge
 
